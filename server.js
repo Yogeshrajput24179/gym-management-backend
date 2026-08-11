@@ -7,7 +7,12 @@ import "./models/sequelizeModels.js";
 import memberRoutes from "./routes/member.js";
 import trainerRoutes from "./routes/trainer.js";
 import attendenceRouter from "./routes/attendence.js";
-import membershipPlanRoutes from "./routes/membershipPlan.js"; // Match exact file name
+import membershipPlanRoutes from "./routes/membershipPlan.js";
+import dietPlanRoutes from "./routes/dietPlan.js";
+
+// ❌ OLD: import workoutPlanRoutes from "./models/workoutPlan.js";
+// ✅ NEW: Import from the routes directory instead of models
+import workoutPlanRoutes from "./routes/workoutPlan.js"; 
 
 dotenv.config();
 
@@ -26,6 +31,13 @@ app.use("/api/members", memberRoutes);
 // Mount trainers (singular and plural)
 app.use("/api/trainer", trainerRoutes);
 app.use("/api/trainers", trainerRoutes);
+
+// Mount workout plans (support both kebab-case and camelCase)
+app.use("/api/workout-plan", workoutPlanRoutes);
+app.use("/api/workoutPlan", workoutPlanRoutes);
+
+// Mount diet plans (support both kebab-case and camelCase)
+app.use("/api/dietPlan", dietPlanRoutes);
 
 // Mount attendance (support both spellings)
 app.use("/api/attendance", attendenceRouter);

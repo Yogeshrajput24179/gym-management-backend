@@ -1,11 +1,15 @@
 {
   "dependencies": {
+    "@google/genai": "^2.16.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "groq-sdk": "^1.5.0",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.23.0",
+    "openai": "^7.4.0",
+    "pdfkit": "^0.19.1",
     "sequelize": "^6.37.8"
   },
   "devDependencies": {
