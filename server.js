@@ -9,10 +9,8 @@ import trainerRoutes from "./routes/trainer.js";
 import attendenceRouter from "./routes/attendence.js";
 import membershipPlanRoutes from "./routes/membershipPlan.js";
 import dietPlanRoutes from "./routes/dietPlan.js";
-
-// ❌ OLD: import workoutPlanRoutes from "./models/workoutPlan.js";
-// ✅ NEW: Import from the routes directory instead of models
 import workoutPlanRoutes from "./routes/workoutPlan.js"; 
+import paymentRoutes from "./routes/payment.js"; // 👈 Added payment routes import
 
 dotenv.config();
 
@@ -24,31 +22,35 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 
-// Mount members (singular and plural)
+// Members & Users
 app.use("/api/member", memberRoutes);
 app.use("/api/members", memberRoutes);
+app.use("/api/user", memberRoutes);  
+app.use("/api/users", memberRoutes);
 
-// Mount trainers (singular and plural)
+// Trainers
 app.use("/api/trainer", trainerRoutes);
 app.use("/api/trainers", trainerRoutes);
 
-// Mount workout plans (support both kebab-case and camelCase)
+// Workout Plans
 app.use("/api/workout-plan", workoutPlanRoutes);
 app.use("/api/workoutPlan", workoutPlanRoutes);
 
-// Mount diet plans (support both kebab-case and camelCase)
+// Diet Plans
 app.use("/api/dietPlan", dietPlanRoutes);
 
-// Mount attendance (support both spellings)
+// Attendance
 app.use("/api/attendance", attendenceRouter);
 app.use("/api/attendence", attendenceRouter);
 
-// Mount membership plans (support /plans and /membershipplan)
+// Membership Plans
 app.use("/api/plans", membershipPlanRoutes);
 app.use("/api/membership-plans", membershipPlanRoutes);
+app.use("/api/membershipPlan", membershipPlanRoutes); 
 
-// Fix "Failed to fetch users" by pointing /api/users to memberRoutes
-app.use("/api/users", memberRoutes);
+// Payments
+app.use("/api/payment", paymentRoutes);  
+app.use("/api/payments", paymentRoutes);
 
 async function startServer() {
   try {

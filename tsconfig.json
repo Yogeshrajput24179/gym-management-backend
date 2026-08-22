@@ -5,7 +5,7 @@
     // "rootDir": "./src",
     // "outDir": "./dist",
 
-    // Environment Settings
+    // Environment Settingszz
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "target": "esnext",
