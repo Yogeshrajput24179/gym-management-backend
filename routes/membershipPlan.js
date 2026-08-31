@@ -6,7 +6,7 @@ import authorize from "../middleware/authorize.js";
 const router = express.Router();
 
 // GET all membership plans (Optionally filter active plans using query: /all?activeOnly=true)
-router.get("/all", async (req, res) => {
+router.get("/all", verifyToken, async (req, res) => {
   try {
     const { activeOnly } = req.query;
     const whereClause = activeOnly === "true" ? { status: "active" } : {};
@@ -30,7 +30,7 @@ router.get("/all", async (req, res) => {
 });
 
 // GET a single membership plan by ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const membershipPlan = await MembershipPlan.findByPk(id);
@@ -56,7 +56,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST add a new membership plan
-router.post("/add", verifyToken, authorize("owner", "admin"), async (req, res) => {
+router.post("/add", verifyToken, async (req, res) => {
   try {
     const { plan_name, duration, price, description, status } = req.body;
 
@@ -98,7 +98,7 @@ router.post("/add", verifyToken, authorize("owner", "admin"), async (req, res) =
 });
 
 // PUT update membership plan
-router.put("/update/:id", verifyToken, authorize("owner", "admin"), async (req, res) => {
+router.put("/update/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { plan_name, duration, price, description, status } = req.body;
@@ -142,7 +142,7 @@ router.put("/update/:id", verifyToken, authorize("owner", "admin"), async (req, 
 });
 
 // DELETE membership plan
-router.delete("/delete/:id", verifyToken, authorize("owner"), async (req, res) => {
+router.delete("/delete/:id", verifyToken,  async (req, res) => {
   try {
     const { id } = req.params;
 

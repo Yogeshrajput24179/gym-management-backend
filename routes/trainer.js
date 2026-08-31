@@ -94,7 +94,7 @@ router.post(
 /**
  * Get All Trainers
  */
-router.get("/all", async (req, res) => {
+router.get("/all", verifyToken, async (req, res) => {
     try {
         let {
             page = 1,
@@ -221,7 +221,6 @@ router.get("/all", async (req, res) => {
 router.get(
     "/:id",
     verifyToken,
-    authorize("owner"),
     async (req, res) => {
         try {
             const { id } = req.params;
@@ -258,7 +257,6 @@ router.get(
 router.put(
     "/update/:id",
     verifyToken,
-    authorize("owner"),
     async (req, res) => {
         try {
             const { id } = req.params;
@@ -349,7 +347,6 @@ router.put(
 router.delete(
     "/delete/:id",
     verifyToken,
-    authorize("owner"),
     async (req, res) => {
         try {
             const { id } = req.params;

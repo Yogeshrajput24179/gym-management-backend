@@ -3,13 +3,18 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const sequelize = process.env.DATABASE_URL
-  ? new Sequelize(process.env.DATABASE_URL, {
+const rawUrl = process.env.DATABASE_URL;
+
+// Strip query parameters like ?ssl-mode=... from the URL string
+const cleanDatabaseUrl = rawUrl ? rawUrl.split("?")[0] : null;
+
+const sequelize = cleanDatabaseUrl
+  ? new Sequelize(cleanDatabaseUrl, {
       dialect: "mysql",
       dialectOptions: {
         ssl: {
           require: true,
-          rejectUnauthorized: false, // Required for cloud databases like Aiven
+          rejectUnauthorized: false,
         },
       },
       logging: false,

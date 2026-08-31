@@ -4,6 +4,7 @@ import { Op } from "sequelize";
 import Payment from "../models/payment.js";
 import Member from "../models/member.js";
 import MembershipPlan from "../models/membershipPlan.js";
+import verifyToken from "../middleware/verifyToken.js";
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ const ALLOWED_SORT_FIELDS = ["id", "amount", "payment_date", "createdAt", "updat
 const ALLOWED_SORT_ORDERS = ["ASC", "DESC"];
 
 // POST: Add new payment
-router.post("/add", async (req, res) => {
+router.post("/add", verifyToken, async (req, res) => {
   try {
     const {
       member_id,
@@ -217,11 +218,11 @@ const handleGetAllPayments = async (req, res) => {
   }
 };
 
-router.get("/all", handleGetAllPayments);
-router.get("/", handleGetAllPayments);
+router.get("/all", verifyToken, handleGetAllPayments);
+router.get("/", verifyToken, handleGetAllPayments);
 
 // GET: Single payment by ID (Removed verifyToken & authorize)
-router.get("/:id", async (req, res) => {
+router.get("/:id", verifyToken, async (req, res) => {
   try {
     const payment = await Payment.findByPk(req.params.id, {
       include: [
@@ -258,7 +259,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // PUT: Update payment (Removed verifyToken & authorize)
-router.put("/update/:id", async (req, res) => {
+router.put("/update/:id", verifyToken, async (req, res) => {
   try {
     const payment = await Payment.findByPk(req.params.id);
 
@@ -370,7 +371,7 @@ router.put("/update/:id", async (req, res) => {
 });
 
 // DELETE: Delete payment (Removed verifyToken & authorize)
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", verifyToken, async (req, res) => {
   try {
     const payment = await Payment.findByPk(req.params.id);
 

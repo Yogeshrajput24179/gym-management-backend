@@ -67,7 +67,7 @@ const getCurrentDateString = () => {
  * Root Attendance Endpoint (Fixes frontend 404)
  * Handles queries: ?type=member|trainer & id=123 & month=8 & year=2026
  */
-router.get("/", async (req, res) => {
+router.get("/", verifyToken, async (req, res) => {
   try {
     const { type, id, month, year } = req.query;
 
@@ -96,7 +96,7 @@ router.get("/", async (req, res) => {
  * Get Attendance for Individual Member or Trainer for Calendar
  * Query params: ?type=member|trainer & id=123 & month=2026-08
  */
-router.get("/user-calendar", async (req, res) => {
+router.get("/user-calendar", verifyToken, async (req, res) => {
     try {
         const { type, id, month } = req.query; // e.g. type="member", id=5, month="2026-08"
 
@@ -156,7 +156,7 @@ router.get("/user-calendar", async (req, res) => {
 /**
  * Search Members for Quick Front Desk Check-In
  */
-router.get("/search-members", async (req, res) => {
+router.get("/search-members", verifyToken, async (req, res) => {
     try {
         const { query = "" } = req.query;
 
@@ -192,7 +192,7 @@ router.get("/search-members", async (req, res) => {
 /**
  * 1-Click Toggle Check-In / Check-Out
  */
-router.post("/toggle", async (req, res) => {
+router.post("/toggle", verifyToken, async (req, res) => {
     try {
         const { member_id } = req.body;
 
@@ -268,7 +268,7 @@ router.post("/toggle", async (req, res) => {
 /**
  * Add Attendance (Manual Add Endpoint)
  */
-router.post("/add", async (req, res) => {
+router.post("/add", verifyToken, async (req, res) => {
     try {
         const { member_id, check_in, check_out, status = "Present" } = req.body;
 
@@ -322,7 +322,7 @@ router.post("/add", async (req, res) => {
 /**
  * Get All Attendance Records (Paginated)
  */
-router.get("/all", async (req, res) => {
+router.get("/all", verifyToken, async (req, res) => {
     try {
         let {
             page = 1,
@@ -400,7 +400,7 @@ router.get("/all", async (req, res) => {
 /**
  * Get Single Attendance Record
  */
-router.get("/:id", async (req, res) => {
+router.get("/:id", verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -443,7 +443,7 @@ router.get("/:id", async (req, res) => {
 /**
  * Update Attendance Record
  */
-router.put("/update/:id", async (req, res) => {
+router.put("/update/:id", verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -483,7 +483,7 @@ router.put("/update/:id", async (req, res) => {
 /**
  * Delete Attendance Record
  */
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
 

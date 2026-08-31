@@ -27,7 +27,7 @@ const normalizeStatus = (status) => {
 /**
  * 1. GET /api/members
  */
-router.get("/", async (req, res) => {
+router.get("/", verifyToken, async (req, res) => {
   try {
     const members = await Member.findAll({
       include: [
@@ -45,7 +45,7 @@ router.get("/", async (req, res) => {
 /**
  * 2. GET /api/members/all
  */
-router.get("/all", async (req, res) => {
+router.get("/all", verifyToken, async (req, res) => {
   try {
     let {
       page = 1,
@@ -135,7 +135,7 @@ router.get("/all", async (req, res) => {
 /**
  * 3. GET /api/members/:id
  */
-router.get("/:id", async (req, res) => {
+router.get("/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const member = await Member.findByPk(id, {
@@ -157,7 +157,7 @@ router.get("/:id", async (req, res) => {
 /**
  * 4. POST /api/members/add
  */
-router.post("/add", async (req, res) => {
+router.post("/add",verifyToken, async (req, res) => {
   try {
     const {
       full_name, gender, phone, email, address, emergency_contact,
@@ -209,7 +209,7 @@ router.post("/add", async (req, res) => {
 /**
  * 5. PUT /api/members/update/:id
  */
-router.put("/update/:id", async (req, res) => {
+router.put("/update/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -246,7 +246,7 @@ router.put("/update/:id", async (req, res) => {
 /**
  * 6. DELETE /api/members/delete/:id
  */
-router.delete("/delete/:id",  async (req, res) => {
+router.delete("/delete/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const member = await Member.findByPk(id);

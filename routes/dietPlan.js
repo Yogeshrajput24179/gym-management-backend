@@ -3,10 +3,11 @@ import OpenAI from "openai";
 import PDFDocument from "pdfkit";
 import DietPlan from "../models/dietPlan.js";
 import Member from "../models/member.js"; // Adjust import path to your Member model
+import verifyToken from "../middleware/verifyToken.js";
 
 const router = express.Router();
 
-router.post("/generate", async (req, res) => {
+router.post("/generate", verifyToken, async (req, res) => {
     console.log("Generating diet plan with OpenRouter...");
 
     const apiKey = process.env.OPENROUTER_API_KEY;

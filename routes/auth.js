@@ -1,86 +1,80 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import User from "../models/user.js";
 import jwt from "jsonwebtoken";
+import { Op } from "sequelize"; // Needed for combined queries
+
+import User from "../models/user.js";
 import verifyToken from "../middleware/verifyToken.js";
 
 const router = express.Router();
 
+// 1. REGISTER USER
 router.post("/register", async (req, res) => {
-    try {
-        const { name, phone, email, password } = req.body;
+  try {
+    const { name, phone, email, password } = req.body;
 
-        if (!name || !phone || !email || !password) {
-            return res.status(400).json({
-                success: false,
-                message: "All fields are required",
-            });
-        }
-
-        const existingEmail = await User.findOne({
-            where: { email },
-        });
-
-        if (existingEmail) {
-            return res.status(400).json({
-                success: false,
-                message: "Email already registered",
-            });
-        }
-
-        const existingPhone = await User.findOne({
-            where: { phone },
-        });
-
-        if (existingPhone) {
-            return res.status(400).json({
-                success: false,
-                message: "Phone number already registered",
-            });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const user = await User.create({
-            name,
-            phone,
-            email,
-            password: hashedPassword,
-        });
-        const token = jwt.sign(
-            {
-                id: user.id,
-                role: user.role,
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: "7d",
-            }
-        );
-
-        return res.status(201).json({
-            success: true,
-            message: "User registered successfully",
-            data: {
-                id: user.id,
-                name: user.name,
-                phone: user.phone,
-                email: user.email,
-                role: user.role,
-            },
-        });
-
-    } catch (error) {
-        console.error(error);
-
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-        });
+    if (!name || !phone || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
+
+    // Single DB query to check both email & phone duplicates
+    const existingUser = await User.findOne({
+      where: {
+        [Op.or]: [{ email }, { phone }],
+      },
+    });
+
+    if (existingUser) {
+      const isEmailConflict = existingUser.email === email;
+      return res.status(400).json({
+        success: false,
+        message: isEmailConflict
+          ? "Email already registered"
+          : "Phone number already registered",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      phone,
+      email,
+      password: hashedPassword,
+    });
+
+    // Generate token so user is automatically logged in upon registering
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      token,
+      data: {
+        id: user.id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Registration Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 });
 
-
+// 2. LOGIN USER
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -103,10 +97,7 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const isPasswordMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatch) {
       return res.status(401).json({
@@ -116,16 +107,10 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      {
-        id: user.id,
-        role: user.role,
-      },
+      { id: user.id, role: user.role },
       process.env.JWT_SECRET,
-      {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-      }
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );
-
 
     return res.status(200).json({
       success: true,
@@ -140,8 +125,7 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-
+    console.error("Login Error:", error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -149,12 +133,33 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// 3. GET PROFILE (Fresh DB Fetch)
 router.get("/profile", verifyToken, async (req, res) => {
-    return res.status(200).json({
-        success: true,
-        message: "Profile fetched successfully",
-        user: req.user,
+  try {
+    // Fetch fresh user data from DB using decoded token ID
+    const user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ["password"] },
     });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile fetched successfully",
+      user,
+    });
+  } catch (error) {
+    console.error("Profile Fetch Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 });
 
 export default router;

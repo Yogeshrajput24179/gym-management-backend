@@ -1,10 +1,11 @@
 import express from "express";
 import OpenAI from "openai";
 import PDFDocument from "pdfkit";
+import verifyToken from "../middleware/verifyToken.js";
 
 const router = express.Router();
 
-router.post("/generate", async (req, res) => {
+router.post("/generate", verifyToken, async (req, res) => {
   console.log("Generating workout plan with OpenRouter...");
 
   const apiKey = process.env.OPENROUTER_API_KEY;

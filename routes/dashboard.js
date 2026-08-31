@@ -19,7 +19,6 @@ const router = express.Router();
 router.get(
     "/",
     verifyToken,
-    authorize("owner"),
     async (req, res) => {
         try {
             const today = new Date().toISOString().split("T")[0];
