@@ -8,6 +8,10 @@ import verifyToken from "../middleware/verifyToken.js";
 
 const router = express.Router();
 
+// Fallback secret in case process.env.JWT_SECRET is missing on Render
+const JWT_SECRET = process.env.JWT_SECRET || "fallback_gym_app_secret_key_2026";
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+
 // 1. REGISTER USER
 router.post("/register", async (req, res) => {
   try {
@@ -16,7 +20,7 @@ router.post("/register", async (req, res) => {
     if (!name || !phone || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: "All fields (name, phone, email, password) are required",
       });
     }
 
@@ -46,11 +50,11 @@ router.post("/register", async (req, res) => {
       password: hashedPassword,
     });
 
-    // Generate token so user is automatically logged in upon registering
+    // Generate token with safe secret fallback
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
     );
 
     return res.status(201).json({
@@ -69,7 +73,7 @@ router.post("/register", async (req, res) => {
     console.error("Registration Error:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message || "Internal Server Error",
     });
   }
 });
@@ -106,10 +110,11 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    // Generate token with safe secret fallback
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
     );
 
     return res.status(200).json({
@@ -128,7 +133,7 @@ router.post("/login", async (req, res) => {
     console.error("Login Error:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message || "Internal Server Error",
     });
   }
 });
@@ -157,7 +162,7 @@ router.get("/profile", verifyToken, async (req, res) => {
     console.error("Profile Fetch Error:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message || "Internal Server Error",
     });
   }
 });
