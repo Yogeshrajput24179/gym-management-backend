@@ -258,8 +258,8 @@ router.get("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// PUT: Update payment (Removed verifyToken & authorize)
-router.put("/update/:id", verifyToken, async (req, res) => {
+// PUT: Update payment handler
+const handleUpdatePayment = async (req, res) => {
   try {
     const payment = await Payment.findByPk(req.params.id);
 
@@ -368,10 +368,13 @@ router.put("/update/:id", verifyToken, async (req, res) => {
       message: "Internal Server Error",
     });
   }
-});
+};
 
-// DELETE: Delete payment (Removed verifyToken & authorize)
-router.delete("/delete/:id", verifyToken, async (req, res) => {
+router.put("/update/:id", verifyToken, handleUpdatePayment);
+router.put("/:id", verifyToken, handleUpdatePayment);
+
+// DELETE: Delete payment handler
+const handleDeletePayment = async (req, res) => {
   try {
     const payment = await Payment.findByPk(req.params.id);
 
@@ -395,6 +398,9 @@ router.delete("/delete/:id", verifyToken, async (req, res) => {
       message: "Internal Server Error",
     });
   }
-});
+};
+
+router.delete("/delete/:id", verifyToken, handleDeletePayment);
+router.delete("/:id", verifyToken, handleDeletePayment);
 
 export default router;

@@ -9,8 +9,10 @@ import trainerRoutes from "./routes/trainer.js";
 import attendenceRouter from "./routes/attendence.js";
 import membershipPlanRoutes from "./routes/membershipPlan.js";
 import dietPlanRoutes from "./routes/dietPlan.js";
-import workoutPlanRoutes from "./routes/workoutPlan.js"; 
+import workoutPlanRoutes from "./routes/workoutPlan.js";
 import paymentRoutes from "./routes/payment.js";
+import dashboardRoutes from "./routes/dashboard.js";
+import reportRoutes from "./routes/report.js";
 
 dotenv.config();
 
@@ -61,10 +63,17 @@ app.use("/api/attendence", attendenceRouter);
 // Membership Plans
 app.use("/api/plans", membershipPlanRoutes);
 app.use("/api/membership-plans", membershipPlanRoutes);
+app.use("/api/membershipPlans", membershipPlanRoutes);
 
 // Payments
-app.use("/api/payment", paymentRoutes);  
+app.use("/api/payment", paymentRoutes);
 app.use("/api/payments", paymentRoutes);
+
+// Dashboard
+app.use("/api/dashboard", dashboardRoutes);
+
+// Reports
+app.use("/api/reports", reportRoutes);
 
 // Handle non-existent endpoints
 app.use((req, res) => {

@@ -443,7 +443,7 @@ router.get("/:id", verifyToken, async (req, res) => {
 /**
  * Update Attendance Record
  */
-router.put("/update/:id", verifyToken, async (req, res) => {
+const handleUpdateAttendance = async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -478,12 +478,12 @@ router.put("/update/:id", verifyToken, async (req, res) => {
             message: "Internal Server Error",
         });
     }
-});
+};
 
-/**
- * Delete Attendance Record
- */
-router.delete("/delete/:id", verifyToken, async (req, res) => {
+router.put("/update/:id", verifyToken, handleUpdateAttendance);
+router.put("/:id", verifyToken, handleUpdateAttendance);
+
+const handleDeleteAttendance = async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -508,6 +508,9 @@ router.delete("/delete/:id", verifyToken, async (req, res) => {
             message: "Internal Server Error",
         });
     }
-});
+};
+
+router.delete("/delete/:id", verifyToken, handleDeleteAttendance);
+router.delete("/:id", verifyToken, handleDeleteAttendance);
 
 export default router;

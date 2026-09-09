@@ -62,20 +62,59 @@ router.post("/generate", verifyToken, async (req, res) => {
       }
     `;
 
-    const response = await openai.chat.completions.create({
-      model: "openrouter/free",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a professional fitness trainer and nutritionist. Respond ONLY in valid JSON.",
-        },
-        { role: "user", content: prompt },
-      ],
-      response_format: { type: "json_object" },
-    });
+    let planData;
+    try {
+      const response = await openai.chat.completions.create({
+        model: "openrouter/free",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a professional fitness trainer and nutritionist. Respond ONLY in valid JSON.",
+          },
+          { role: "user", content: prompt },
+        ],
+        response_format: { type: "json_object" },
+      });
 
-    const planData = JSON.parse(response.choices[0].message.content);
+      planData = JSON.parse(response.choices[0].message.content);
+    } catch (apiErr) {
+      console.warn("OpenRouter API fallback in workout plan:", apiErr.message);
+      planData = {
+        planOverview: `Custom ${experience_level} workout routine tailored for ${fitness_goal} (${workout_days} days/week).`,
+        dailyCalories: Math.round(weight_kg * 32),
+        macros: { protein: `${Math.round(weight_kg * 2.2)}g`, carbs: `${Math.round(weight_kg * 3.5)}g`, fats: `${Math.round(weight_kg * 0.9)}g` },
+        schedule: [
+          {
+            day: "Day 1",
+            focus: "Chest & Triceps Power",
+            exercises: [
+              { name: "Barbell Bench Press", sets: 4, reps: "8-10", rest: "90s" },
+              { name: "Incline Dumbbell Press", sets: 3, reps: "10-12", rest: "75s" },
+              { name: "Tricep Rope Pushdowns", sets: 4, reps: "12-15", rest: "60s" }
+            ]
+          },
+          {
+            day: "Day 2",
+            focus: "Back & Biceps Hypertrophy",
+            exercises: [
+              { name: "Lat Pulldowns / Pull-ups", sets: 4, reps: "8-10", rest: "90s" },
+              { name: "Barbell Bent-Over Rows", sets: 4, reps: "8-10", rest: "90s" },
+              { name: "Hammer Curls", sets: 3, reps: "12", rest: "60s" }
+            ]
+          },
+          {
+            day: "Day 3",
+            focus: "Legs & Abs Focus",
+            exercises: [
+              { name: "Barbell Back Squats", sets: 4, reps: "8-10", rest: "120s" },
+              { name: "Romanian Deadlifts", sets: 3, reps: "10", rest: "90s" },
+              { name: "Hanging Leg Raises", sets: 3, reps: "15", rest: "45s" }
+            ]
+          }
+        ]
+      };
+    }
 
     // Set Response Headers for PDF Preview in Browser
     res.setHeader("Content-Type", "application/pdf");

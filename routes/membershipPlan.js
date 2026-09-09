@@ -5,8 +5,7 @@ import authorize from "../middleware/authorize.js";
 
 const router = express.Router();
 
-// GET all membership plans (Optionally filter active plans using query: /all?activeOnly=true)
-router.get("/all", verifyToken, async (req, res) => {
+const handleGetAllPlans = async (req, res) => {
   try {
     const { activeOnly } = req.query;
     const whereClause = activeOnly === "true" ? { status: "active" } : {};
@@ -27,7 +26,10 @@ router.get("/all", verifyToken, async (req, res) => {
       message: "Internal Server Error",
     });
   }
-});
+};
+
+router.get("/all", verifyToken, handleGetAllPlans);
+router.get("/", verifyToken, handleGetAllPlans);
 
 // GET a single membership plan by ID
 router.get("/:id", verifyToken, async (req, res) => {
@@ -97,8 +99,8 @@ router.post("/add", verifyToken, async (req, res) => {
   }
 });
 
-// PUT update membership plan
-router.put("/update/:id", verifyToken, async (req, res) => {
+// Update membership plan handler
+const handleUpdatePlan = async (req, res) => {
   try {
     const { id } = req.params;
     const { plan_name, duration, price, description, status } = req.body;
@@ -139,10 +141,13 @@ router.put("/update/:id", verifyToken, async (req, res) => {
       message: "Internal Server Error",
     });
   }
-});
+};
 
-// DELETE membership plan
-router.delete("/delete/:id", verifyToken,  async (req, res) => {
+router.put("/update/:id", verifyToken, handleUpdatePlan);
+router.put("/:id", verifyToken, handleUpdatePlan);
+
+// Delete membership plan handler
+const handleDeletePlan = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -168,6 +173,9 @@ router.delete("/delete/:id", verifyToken,  async (req, res) => {
       message: "Internal Server Error",
     });
   }
-});
+};
+
+router.delete("/delete/:id", verifyToken, handleDeletePlan);
+router.delete("/:id", verifyToken, handleDeletePlan);
 
 export default router;

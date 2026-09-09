@@ -130,9 +130,9 @@ router.get("/all", verifyToken, async (req, res) => {
         // Search
         if (search.trim()) {
             where[Op.or] = [
-                { full_name: { [Op.iLike]: `%${search.trim()}%` } },
-                { email: { [Op.iLike]: `%${search.trim()}%` } },
-                { phone: { [Op.iLike]: `%${search.trim()}%` } },
+                { full_name: { [Op.like]: `%${search.trim()}%` } },
+                { email: { [Op.like]: `%${search.trim()}%` } },
+                { phone: { [Op.like]: `%${search.trim()}%` } },
             ];
         }
 
@@ -342,42 +342,50 @@ router.put(
 );
 
 /**
- * Delete Trainer (Soft Delete)
+ * Delete Trainer Handler
  */
-router.delete(
-    "/delete/:id",
-    verifyToken,
-    async (req, res) => {
-        try {
-            const { id } = req.params;
+const handleDeleteTrainer = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { hard } = req.query;
 
-            const trainer = await Trainer.findByPk(id);
+        const trainer = await Trainer.findByPk(id);
 
-            if (!trainer) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Trainer not found",
-                });
-            }
-
-            await trainer.update({
-                status: "inactive",
-            });
-
-            return res.status(200).json({
-                success: true,
-                message: "Trainer deactivated successfully",
-            });
-
-        } catch (error) {
-            console.error(error);
-
-            return res.status(500).json({
+        if (!trainer) {
+            return res.status(404).json({
                 success: false,
-                message: "Internal Server Error",
+                message: "Trainer not found",
             });
         }
+
+        if (hard === "true") {
+            await trainer.destroy();
+            return res.status(200).json({
+                success: true,
+                message: "Trainer permanently deleted successfully",
+            });
+        }
+
+        await trainer.update({
+            status: "inactive",
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Trainer deactivated successfully",
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
     }
-);
+};
+
+router.delete("/delete/:id", verifyToken, handleDeleteTrainer);
+router.delete("/:id", verifyToken, handleDeleteTrainer);
 
 export default router;

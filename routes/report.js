@@ -11,14 +11,12 @@ import authorize from "../middleware/authorize.js";
 
 const router = express.Router();
 
-export default router;
-
 
 
 router.get(
     "/revenue",
     verifyToken,
-    authorize("owner"),
+    authorize("owner", "admin", "staff"),
     async (req, res) => {
         try {
             const { startDate, endDate } = req.query;
@@ -75,7 +73,7 @@ router.get(
 router.get(
     "/attendance",
     verifyToken,
-    authorize("owner"),
+    authorize("owner", "admin", "staff"),
     async (req, res) => {
         try {
             const { startDate, endDate } = req.query;
@@ -118,7 +116,7 @@ router.get(
 router.get(
     "/expiring-memberships",
     verifyToken,
-    authorize("owner"),
+    authorize("owner", "admin", "staff"),
     async (req, res) => {
         try {
             const today = new Date();
@@ -155,7 +153,7 @@ router.get(
 router.get(
     "/pending-payments",
     verifyToken,
-    authorize("owner"),
+    authorize("owner", "admin", "staff"),
     async (req, res) => {
         try {
             const payments = await Payment.findAll({
@@ -190,7 +188,7 @@ router.get(
 router.get(
     "/trainer-members",
     verifyToken,
-    authorize("owner"),
+    authorize("owner", "admin", "staff"),
     async (req, res) => {
         try {
             const trainers = await Trainer.findAll({
@@ -222,3 +220,5 @@ router.get(
         }
     }
 );
+
+export default router;

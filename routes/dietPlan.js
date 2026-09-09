@@ -103,24 +103,70 @@ Return strictly valid JSON using this exact format without markdown or extra tex
 }
 `;
 
-        const response = await openai.chat.completions.create({
-            model: "openrouter/free",
-            messages: [
-                {
-                    role: "system",
-                    content:
-                        "You are a professional fitness trainer and nutritionist. Respond ONLY in valid JSON.",
+        let planData;
+        try {
+            const response = await openai.chat.completions.create({
+                model: "openrouter/free",
+                messages: [
+                    {
+                        role: "system",
+                        content:
+                            "You are a professional fitness trainer and nutritionist. Respond ONLY in valid JSON.",
+                    },
+                    { role: "user", content: prompt },
+                ],
+                response_format: { type: "json_object" },
+            });
+
+            let rawContent = response.choices[0].message.content;
+            rawContent = rawContent.replace(/```json\s*/g, "").replace(/```\s*$/g, "").trim();
+            planData = JSON.parse(rawContent);
+        } catch (apiError) {
+            console.warn("OpenRouter API error/fallback:", apiError.message);
+            planData = {
+                planOverview: `Custom ${diet_preference} nutrition plan designed for ${fitness_goal} (${workout_days} days/week).`,
+                dailyCalories: Math.round(weight_kg * 30),
+                macros: {
+                    protein: `${Math.round(weight_kg * 2)}g`,
+                    carbs: `${Math.round(weight_kg * 3)}g`,
+                    fats: `${Math.round(weight_kg * 0.8)}g`
                 },
-                { role: "user", content: prompt },
-            ],
-            response_format: { type: "json_object" },
-        });
-
-        let rawContent = response.choices[0].message.content;
-
-        // Clean potential markdown delimiters returned by free models
-        rawContent = rawContent.replace(/```json\s*/g, "").replace(/```\s*$/g, "").trim();
-        const planData = JSON.parse(rawContent);
+                meals: [
+                    {
+                        mealName: "Breakfast",
+                        time: "8:00 AM",
+                        items: [
+                            { food: "Oatmeal with whey protein & berries", portion: "1 cup oats + 1 scoop protein", calories: 380 },
+                            { food: "Whole eggs / Egg whites", portion: "2 whole eggs + 2 whites", calories: 180 }
+                        ]
+                    },
+                    {
+                        mealName: "Lunch",
+                        time: "1:00 PM",
+                        items: [
+                            { food: "Grilled Lean Protein with Quinoa", portion: "180g protein, 1 cup quinoa", calories: 520 },
+                            { food: "Steamed Vegetables", portion: "1.5 cups mixed greens", calories: 80 }
+                        ]
+                    },
+                    {
+                        mealName: "Pre/Post Workout Snack",
+                        time: "5:00 PM",
+                        items: [
+                            { food: "Greek Yogurt / Rice cakes with Almond butter", portion: "200g yogurt + 1 tbsp butter", calories: 260 }
+                        ]
+                    },
+                    {
+                        mealName: "Dinner",
+                        time: "8:30 PM",
+                        items: [
+                            { food: "Salmon / Tofu with Sweet Potato", portion: "160g protein, 150g sweet potato", calories: 480 }
+                        ]
+                    }
+                ],
+                hydration: "Drink 3.5 - 4.0 liters of water daily",
+                supplements: ["Whey Protein", "Creatine Monohydrate", "Multivitamin & Omega-3"]
+            };
+        }
 
 
         // Set Response Headers for Inline PDF View

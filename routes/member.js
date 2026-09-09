@@ -207,9 +207,9 @@ router.post("/add",verifyToken, async (req, res) => {
 });
 
 /**
- * 5. PUT /api/members/update/:id
+ * Update Member Handler
  */
-router.put("/update/:id", verifyToken, async (req, res) => {
+const handleUpdateMember = async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -241,19 +241,28 @@ router.put("/update/:id", verifyToken, async (req, res) => {
     console.error("Update Member Error:", error);
     return res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
-});
+};
+
+router.put("/update/:id", verifyToken, handleUpdateMember);
+router.put("/:id", verifyToken, handleUpdateMember);
 
 /**
- * 6. DELETE /api/members/delete/:id
+ * Delete Member Handler
  */
-router.delete("/delete/:id", verifyToken, async (req, res) => {
+const handleDeleteMember = async (req, res) => {
   try {
     const { id } = req.params;
+    const { hard } = req.query;
     const member = await Member.findByPk(id);
 
     if (!member) return res.status(404).json({ success: false, message: "Member not found" });
 
-    // FIX: Match exact database ENUM capitalization ('Inactive')
+    if (hard === "true") {
+      await member.destroy();
+      return res.status(200).json({ success: true, message: "Member permanently deleted successfully" });
+    }
+
+    // Default: Soft delete (Deactivate)
     await member.update({ status: "Inactive" });
 
     return res.status(200).json({ success: true, message: "Member deactivated successfully" });
@@ -261,6 +270,9 @@ router.delete("/delete/:id", verifyToken, async (req, res) => {
     console.error("Delete Member Error:", error);
     return res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
-});
+};
+
+router.delete("/delete/:id", verifyToken, handleDeleteMember);
+router.delete("/:id", verifyToken, handleDeleteMember);
 
 export default router;
